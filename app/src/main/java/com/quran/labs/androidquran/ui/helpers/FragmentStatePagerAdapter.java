@@ -18,12 +18,16 @@ package com.quran.labs.androidquran.ui.helpers;
  * Modified for Quran
  * Modifications List (for ease of merging with upstream later on):
  * - added getFragmentIfExists() to return a fragment without recreating it
+ * - catch IllegalStateException in destroyItem
+ * - catch IllegalStateException in finishUpdate
  */
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
@@ -32,8 +36,10 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import timber.log.Timber;
+
 /**
- * Implementation of {@link android.support.v4.view.PagerAdapter} that
+ * Implementation of {@link PagerAdapter} that
  * uses a {@link Fragment} to manage each page. This class also handles
  * saving and restoring of fragment's state.
  *
@@ -42,7 +48,7 @@ import java.util.ArrayList;
  * the user, their entire fragment may be destroyed, only keeping the saved
  * state of that fragment.  This allows the pager to hold on to much less
  * memory associated with each visited page as compared to
- * {@link android.support.v4.app.FragmentPagerAdapter} at the cost of
+ * {@link FragmentPagerAdapter} at the cost of
  * potentially more overhead when switching between pages.
  *
  * <p>When using FragmentPagerAdapter the host ViewPager must have a
@@ -69,7 +75,6 @@ import java.util.ArrayList;
  *      complete}
  */
 public abstract class FragmentStatePagerAdapter extends PagerAdapter {
-   private static final String TAG = "FragmentStatePagerAdapter";
    private static final boolean DEBUG = false;
 
    private final FragmentManager mFragmentManager;
@@ -108,6 +113,7 @@ public abstract class FragmentStatePagerAdapter extends PagerAdapter {
       return null;
    }
 
+   @SuppressLint("CommitTransaction")
    @Override
    public Object instantiateItem(ViewGroup container, int position) {
       // If we already have this item instantiated, there is nothing
@@ -126,7 +132,7 @@ public abstract class FragmentStatePagerAdapter extends PagerAdapter {
       }
 
       Fragment fragment = getItem(position);
-      if (DEBUG) Log.v(TAG, "Adding item #" + position + ": f=" + fragment);
+      if (DEBUG) Timber.v("Adding item #" + position + ": f=" + fragment);
       if (mSavedState.size() > position) {
          Fragment.SavedState fss = mSavedState.get(position);
          if (fss != null) {
@@ -144,6 +150,7 @@ public abstract class FragmentStatePagerAdapter extends PagerAdapter {
       return fragment;
    }
 
+   @SuppressLint("CommitTransaction")
    @Override
    public void destroyItem(ViewGroup container, int position, Object object) {
       Fragment fragment = (Fragment)object;
@@ -151,7 +158,7 @@ public abstract class FragmentStatePagerAdapter extends PagerAdapter {
       if (mCurTransaction == null) {
          mCurTransaction = mFragmentManager.beginTransaction();
       }
-      if (DEBUG) Log.v(TAG, "Removing item #" + position + ": f=" + object
+      if (DEBUG) Timber.v("Removing item #" + position + ": f=" + object
               + " v=" + ((Fragment)object).getView());
       while (mSavedState.size() <= position) {
          mSavedState.add(null);
@@ -218,7 +225,7 @@ public abstract class FragmentStatePagerAdapter extends PagerAdapter {
       }
       for (int i=0; i<mFragments.size(); i++) {
          Fragment f = mFragments.get(i);
-         if (f != null) {
+         if (f != null && f.isAdded()) {
             if (state == null) {
                state = new Bundle();
             }
@@ -254,7 +261,7 @@ public abstract class FragmentStatePagerAdapter extends PagerAdapter {
                   f.setMenuVisibility(false);
                   mFragments.set(index, f);
                } else {
-                  Log.w(TAG, "Bad fragment at key " + key);
+                  Timber.w("Bad fragment at key " + key);
                }
             }
          }

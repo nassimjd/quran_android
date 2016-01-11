@@ -3,302 +3,219 @@ quran for android
 
 this is a simple (madani based) quran app for android.
 
-* images from [quran images project](http://github.com/quran/quran.com-images) on github.
+* madani images from [quran images project](http://github.com/quran/quran.com-images) on github.
+* qaloon images used with permission of Nous Memes Editions Et Diffusion (Tunisia).
+* naskh images used with permission of SHL Info Systems
 * translation, tafsir and Arabic data come from [tanzil](http://tanzil.net) and [King Saud University](http://quran.ksu.edu.sa/).
-* audio from [Every Ayah](http://everyayah.com/).
 
 patches, comments, etc are welcome.
 
 contributors:
 
-* [Hussein Maher](http://twitter.com/husseinmaher)
+* [Asim Mohiuddin](https://github.com/asimmohiuddin) - images, gapless audio 
+    and work on the Naskh version
+* [g360230](https://github.com/g360230) - images and work on the Qaloon
+    version
+* [Somaia Gabr](http://twitter.com/somaiagabr) - ui and graphics.
+* [Shuhrat Dehkanov](http://github.com/ozbek)
 * [Ahmed Farra](http://github.com/afarra)
+* [Hussein Maher](http://twitter.com/husseinmaher)
 * [Wael Nafee](http://twitter.com/wnafee)
 * [Ahmed Fouad](http://twitter.com/fo2ad)
 * [Mahmoud Hossam](http://github.com/mahmoudhossam)
+* [Rehab Mohamed](http://twitter.com/hams_rrr)
+* [Ahmed Essam](http://twitter.com/neo_4583)
 
-graphics by [Somaia Gabr](http://twitter.com/somaiagabr).
-
-Arabic support for non-Arabic phones by [Rehab Mohamed](http://twitter.com/hams_rrr), based on Arabic Reshaper project by [Ahmed Essam](http://twitter.com/Neo_4583).
 
 Code Style
 ------------------------
-- tab size: 2
-- indent : 2
-- continuous indent: 4
+General [Android code style guidelines](https://source.android.com/source/code-style.html) apply, with the exception of following indent sizes:
+- tab size: 2 space
+- indent: 2 space
+- continuous indent: 4 space
 
-you can set these under code style and code style java in android studio or 
-intellij.
+You can set these under Code Style in Android Studio or IntelliJ IDEA.
 
+Alternatively, you may copy [`quran_android-code_style.xml`](https://github.com/quran/quran_android/blob/master/quran_android-code_style.xml) to Android Studio/IntelliJ IDEA codestyles folder. For Android Studio, that folder is located at `~/.AndroidStudioPreview1.2/config/codestyles` (the root folder name may differ depending on the host machine and Android Studio version, but the rest of the path should be same). After copying the `quran_android-code_style.xml`, go to Code Style preferences screen and choose `quran_android-code_style` from Code Style Schemes.
 
 Setup
 ------------------------
-1. download the latest canary version of [android studio](http://tools.android.com/download/studio/canary) (latest as of this writing is version 0.5.1)
-2. make sure you have the android sdk installed, along with the sdk tools,
-platform-tools, android 4.2.2 sdk platform, android support repository, android support library, and google repository.
-3. make a file called `local.properties` with one line in it:
-`sdk.dir=/path/to/your/android/sdk` 
-(make sure to replace `/path/to/your/android/sdk` with the directory to which you downloaded the android sdk).
-4. run android studio, choose import project, then choose build.gradle from
-the main quran source code directory.
-5. if you want to build from the command line instead, you can build by running `./gradlew assembleDebug` (after completing steps 1-3 above).
+1. get and install the [android sdk](http://developer.android.com/sdk/index.html)
+2. make sure `$ANDROID_HOME` is set to the correct place.
+3. build from the command line by running `./gradlew assembleDebug`
+4. if you want an ide, download the latest version of [android studio](http://tools.android.com/download/studio/canary) (latest as of this writing is version 0.8.14)
+5. run android studio, choose import project, then choose build.gradle from the main quran source code directory.
 
 and that's it!
 
 App localization
 ------------------------
 
-* Farsi for version 2.0 by M. Jafar Nakar
+* Farsi for version 2.0 by [M. Jafar Nakar](https://github.com/mjnanakar).
 * Farsi for version 1.6 by [khajavi](http://github.com/khajavi).
-* Turkish by Mehmed Mahmudoglu.
-* Russian by Rinat (Ринат Валеев).
-* Kurdish by Goran Gharib Karim.
+* Turkish by Mehmed Mahmudoglu. 
+* Turkish updates by [Shuhrat Dehkanov](http://github.com/ozbek).
+* Russian by Rinat [Ринат Валеев](https://github.com/Valey).
+* Kurdish by [Goran Gharib Karim](https://github.com/GorranKurd).
 * French by Yasser [yasserkad](http://github.com/yasserkad).
 * German by [Armin Supuk](http://github.com/ArminSupuk).
-* Chinese by Bo Li
-* Uyghur by Abduqadir Abliz [Sahran](http://github.com/Sahran)
-* Indonesian by [Saiful Khaliq](http://twitter.com/saifious)
+* Chinese by [Bo Li](http://twitter.com/liboat).
+* Uyghur by Abduqadir Abliz [Sahran](http://github.com/Sahran).
+* Indonesian by [Saiful Khaliq](http://twitter.com/saifious).
+* Malaysian by [Ahmad Syazwan](https://github.com/asyazwan).
+* Spanish by [Alexander Salas](https://github.com/alexsalas).
+* Uzbek by [Shuhrat Dehkanov](https://github.com/ozbek").
 
-
-Terms of use
-------------
-you are free to use parts of the Quran Android code in your application
-with some conditions:
-
-* your app must be respectful of the book of Allah.  adding advertisements
-above and below each page of Quran is unacceptable, for example (yes,
-someone actually did that).
-
-* your app must provide some significant value over our app - otherwise,
-why not just contribute a patch instead?
-
-* your app cannot make money from ads or from sales.  there are many reasons
-for this:
-    - we made this app for the benefit of people and not to make a profit
-    - the app costs us money (for serving the pages, translations, etc), not to
-mention the time to develop it and to support it.
-    - not all of the data that we use is okay to be sold.  the images, along with
-some of the translations are on a license that allows their use and distribution
-for free for non-profit uses, but does not allow users to make money from them.
-
-* if you write an application using any of the Quran data (the images, the
-translations, etc), you must provide a link to the respective data source
-page ([tanzil.net](http://tanzil.net) for the translations and the
-[quran images project](http://github.com/quran/quran.com-images) for the images)
-both within your application (in an about page) and in your application
-description in the market or app store.
-
-* if you use part of (or all of) the quran android code or graphics, you
-must provide a link back to the [quran android
-project](http://github.com/ahmedre/quran_android) in your application
-description and your application itself in an about section.
+and many others, may Allah reward everyone!
 
 Open Source Projects Used
 -------------------------
-* [ActionBarSherlock](http://abs.io)
+* android-support library (support-v4 and appcompat-v7)
+* [AndroidSlidingUpPanel](https://github.com/umano/AndroidSlidingUpPanel)
+* [OkHttp](https://github.com/square/okhttp)
+* [RxJava](https://github.com/ReactiveX/RxJava)
+* [RxAndroid](https://github.com/ReactiveX/RxAndroid)
+* [moshi](https://github.com/square/moshi)
 
 Changelog
 ---------
-**version 2.5.1** (released 2/17/2014)
-- minor fixes
+**current**
+- import / export bookmarks
+- merged tags and bookmarks into one screen
+- lots of improvements and bugfixes
 
-**version 2.5.0** (released 2/10/2014)
-- fixes for indonesian
-- fix sdcard issue on 4.3+
-- various bugfixes and improvements
+**version 2.6.7-p4 (released 11/15/2015)**
+- fix launch crash when upgrading prefs for people stuck between the bug
+  introduced in p2 (not crashing with it and instead running the wrong
+  behavior), and the fix in p3.
+    
+**version 2.6.7-p3 (released 11/15/2015)**
+- fix launch crash when upgrading prefs
 
-**version 2.4.9** (released 12/21/2013)
-- fix galaxy note 8 black bar issue
-- various bugfixes and improvements
+**version 2.6.7-p2 (released 11/14/2015)**
+- fix audio scrolling issue
+- fix tashkeel being cut off on fonts
+- new about screen
+- improvements to preferences
+- repeat bug fixes
+- permissions related bug fixes
 
-**version 2.4.8** (released 11/3/2013)
-- fix numerous crashes related to search
-- fix many various other crashes
-- added icon for nexus 5
+**version 2.6.7-p1 (released 10/24/2015)**
+- fix audio manager launch crash due to rx proguard issue.
 
-**version 2.4.7** (released 10/8/2013)
-- fix some crashes
+**version 2.6.7 (released 10/24/2015)**
+- only use uthmani font on apis 18 and above.
+- better handling for landscape audio highlighting.
+- improve "repeat verses" wording
+- increase Quran text size in translation view
+- decrease line spacing for Quran text in translation view
+- upgrade libraries.
 
-**version 2.4.6** (released 10/6/2013)
-- hide actionbar on resume if it was hidden
-- change 14:50 to 14:49 in juz' list
-- settings take effect right away for pages and translations
-- improve highlighting of search results
-- fix issues with app being in a confused language state
-- Russian translation updates
-- added Turkish and Indonesian translations
-- added sheikh Nasser al Qatami
-- fix an issue where search results weren't highlighting in some cases
-- fix an issue where next sura wasn't playing in some cases
-- improve the jump to dialog
-- switch build to gradle
+_flavor specific_
+- naskh: highlighting fix
 
-**version 2.4.5** (released 7/9/2013)
-- fix a bug which caused s4/htc one/etc to load smaller images
+**version 2.6.6 (released 10/4/2015)**
+- android M support
+- use different font for arabic text
+- add 12 new gapless qaris
+- separate basmallah from first ayah in translation
+- fix buggy audio autoscrolling in landscape quran/quran_android#545
+- fix "calculating app size" quran/quran_android#536
+- many bugfixes and improvements
 
-**version 2.4.4** (released 7/6/2013)
-- fix bug where devices that should not get tablet mode were getting it
-- fixed issue on some asus tablets where images weren't showing up
-- improve issues with notifications while playing audio
-- added sheikh Yasser Ad-Dussary
-- fixes for "move to sdcard"
-- fix miui actionbar toggle issue
-- fixed some crashes
+_flavor specific_
+- qaloon: patch to fix page 304.
+- qaloon: add a qari, sheikh Ahmad Khidr Attarabolsi
+- naskh: use different database and font for arabic text
 
-**version 2.4.2 and 2.4.3** (released 6/18/2013)
-- critical bugfix for night mode font issue
-- changed default font to white for night mode
-- patch download for 1920 resolution images to fix 3 incomplete images
-- patch download for people who recently downloaded page 270
+**version 2.6.5p1 (released 5/31/2015)**
+- fix a crash when tapping a search result
 
-**version 2.4.1** (released 6/16/2013)
-- option to disable tablet mode
+**version 2.6.5 (released 5/31/2015)**
+- improvements for rtl layouts in rtl languages on apis 17+
+- update image version to fix #529 and fix pages 1 and 2
+- many ui improvements (audio bar, tablet, ripples on l+, etc)
+- fix arabic setting on android M
+- material style dialogs
+- lots of bugfixes and improvements
+
+**version 2.6.4p1 (released 4/13/2015)**
+- revert support-v4 and appcompat-v7 to v21.0.3 due to contextual action
+bar bug. see https://code.google.com/p/android/issues/detail?id=165243
+
+**version 2.6.4 (released 4/13/2015)**
+- minor fixes for crashes
+- since it seems that the notification crashes happen at random, and only
+after lots of notification traffic, this patch attempts to cut down on
+the notification traffic by remembering the last progress and maximum
+values and only posting the notification if they changed.
+
+**version 2.6.3 (released 4/12/2015)**
+- fix a bug where audio bar was hidden on tablet in landscape
+- persist highlight of ayah between translation and pages
+- highlight the verse number along with a verse
+- additional attempts to working around notification and LG crashes
+- minor bugfixes and improvements
+
+**version 2.6.2 (released 4/1/2015)**
+- spinner is now wide throughout
+- spinner automatically jumps to the selected value
+- use material style search
+- swap next and previous buttons in notification
+- added Turkish sura names, shortened Russian translation of sura names
+- improvements to custom storage location preference screen
+- a plethora of bugfixes
+
+**version 2.6.1 (released 3/10/2015)**
+- fix audio not playing without connection
+- fix some crashes and add some crash logging
+
+**version 2.6.0 (released 3/8/2015)**
+- material design!
+- experimental audio manager with download all functionality.
+- change the translator from the translation popup.
+- tons of bugfixes.
+- now only supports sdk 14+ (ice cream sandwich and above)
+
+**version 2.5.8 (released 7/5/2014)**
+- fixing tablet bugs causing the page not to show up
+
+**version 2.5.7 (released 7/4/2014)**
+- added arrows to switch to next/previous ayah from translation panel
+- added translator name in panel
+- more clear night mode setting (thanks @ozbek)
+- show an error and retry button instead of a blank page when page can't load
+- spanish translation (thanks @alexsalas)
+- update turkish translation (thanks @ozbek)
 - many bugfixes
 
-**version 2.4.0** (released 6/15/2013)
+**version 2.5.6 (released 6/29/2014)**
+- fix a crash with panel and audio settings
+- fix tags panel not updating
+- update single image downloading code
 
-- update to german translation (thanks br Armin Supuk)
-- Kurdish translation (thanks bro Goran Gharib Karim)
-- improvements to search
-- multiple sdcard support
-- tablet support for reading view
-- change color of text in translation view and night mode
-- uyghur translation (thanks br Abduqadir Abliz)
-- crash reporting to help us fix issues
-- better images for galaxy s4 and htc one
+**version 2.5.5 (released 6/27/2014)**
+- advanced audio repeat options
+- rich audio notifications
+- fix tablet related issues
 
-**version 2.3.1** (released 4/2/2013)
+**version 2.5.4 (released 6/13/2014)**
+- bugfixes (mainly preferences crash)
+- reset toolbar when you choose a different ayah
 
-- re-add long-press support on translation text
-- fix several crashes based on google play console
-- remove sura name translations in various languages
+**version 2.5.3 (released 6/11/2014)**
+- fix toolbar bugs on android 2.3
+- fix "current page" not being clickable
+- fix lots of search crashes
+- fix saving on external sdcard on kitkat
+- fix tags and bookmarks not refreshing
 
-**version 2.3.0** (released 3/31/2013)
+**version 2.5.2 (released 6/7/2014)**
+- major ui improvements for long press actions
+- option to highlight ayah bookmarks by default
+- malaysian translation (thanks @asyazwan)
+- uyghur translation (thanks @Sahran)
+- right to left layout for arabic (thanks @aessam)
+- many bugfixes and improvements
 
-- sheikh Sudais gapless (thanks br Redouane Chaar)
-- tag improvements (batch tag operations, etc) [\#235](https://github.com/ahmedre/quran_android/issues/235)
-- anti-alias overlay text (thanks @boussouira)
-- bookmark and highlighting code improvements and bugfixes
-- french translation (thanks @yasserkad)
-- chinese translation (thanks Bo Li)
-- german translation (thanks @ArminSupuk)
-- numbers are now localized properly
-- [quranapp.com](http://quranapp.com) sharing support
-- translation text highlights when audio is playing [\#254](https://github.com/ahmedre/quran_android/issues/254)
-- assorted bugfixes
-
-**version 2.2.1** (released 12/31/2012)
-
-- sort bookmarks by date added or by location in the Quran
-- bugfixes - [\#234](https://github.com/ahmedre/quran_android/issues/234)
-
-**version 2.2.0**
-
-- fast switching between translations [\#218](https://github.com/ahmedre/quran_android/issues/218)
-- upgrade process for translations
-- move to maven
-- migrate audio files to `/sdcard/quran_android/audio` instead of temp app directory
-- bookmarks changes
-- exposed an intent to allow launching Quran directly to a
-  page/verse - [\#183](https://github.com/ahmedre/quran_android/issues/183)
-- navigation using volume keys - [\#172](https://github.com/ahmedre/quran_android/issues/172)
-- fix navigation bar jumping on jellybean
-- option to overlay page number, sura name, and juz' on the page - [\#159](https://github.com/ahmedre/quran_android/issues/159)
-- fix actionbar not toggling on translation view on honeycomb+ - [\#158](https://github.com/ahmedre/quran_android/issues/158)
-- fix ldpi devices not being able to download over 3g in certain cases - [\#167](https://github.com/ahmedre/quran_android/issues/167)
-- relax constraint on deciding whether or not data is downloaded - [\#196](https://github.com/ahmedre/quran_android/issues/196)
-
-**version 2.1.0**
-
-- setting to bring back the old background color
-- the "jump to" dialog is back!
-- support for deleting bookmarks from the bookmarks screen
-- setting for those who have their arabic render backwards
-- app is now localized in Russian and Farsi
-
-**version 2.0.2**
-
-- exactly like 2.0.1, just compiled with utf8 files to fix arabic
-
-**version 2.0.1**
-
-- fix market crashes
-
-**version 2.0.0**
-
-- new, improved ui and code rewrite
-- gapless audio support
-- ayah actions (bookmark, share, copy, tafseer)
-- only supports sdks 2.1+
-
-**version 1.6.1**
-
-- download issue fixed
-- restore locale issue fixed
-
-**version 1.6.0**
-
-- search!  searches arabic text and translations!
-- beta: audio repeat feature!
-- beta: night mode!
-- farsi translation now available, and app now localized in farsi (thanks khajavi).
-- full arabic ui
-- better images for ldpi devices.
-- looks nicer now on tablet and large devices.
-- bugfixes for ICS and 1.5 devices.
-- many, many bugfixes and minor improvements.
-
-**version 1.5.2**
-
-- fix crash on android 1.5.
-- rub3/7izb/juz2 notifications while reading
-- autoscroll to ayah if it is not visible on the screen
-- audio options to resume from last played ayah, start of the page, or start
-  of any of the suras on that page.
-- apps2sd support.
-- plethora of bugfixes (arabic fixes, seekbar not refreshing after jump, page
-  resets when orientation changes in translation view, page navigated to in
-  translation not retained when returning to quran view, and warning if the
-  sd card is filled).
-
-**version 1.5**
-
-- audio support
-- highlight ayah
-
-**version 1.4**
-
-- smooth transition between pages
-- resume download support
-
-**version 1.3**
-
-- improved interface
-- support for 1024x768 images
-- translation download support
-- arabic support for non-arabic supporting devices
-- initial search support via search button
-- more translations
-- bugfixes and more
-
-**version 1.2**
-
-- Sahih Internation Translation introduced
-- Fix orientation in either landscape or portrait modes
-- Adjust translation text size
-- Centralized menu for app
-- Bookmarks are added via menu
-- Fixed bookmarks bug
-
-**version 1.1**
-
-- added bookmarks
-- updated browse to allow browsing by juz'
-- remember the last place you left off
-- added help dialog
-- made the screen lock an option
-- fixed a bug where the screen lock wasn't released
-
-**version 1.0**
-
-- initial release
+You can see our complete set of releases [here] (https://github.com/quran/quran_android/releases)

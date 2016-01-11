@@ -1,182 +1,86 @@
 package com.quran.labs.androidquran.ui.helpers;
 
-import android.app.ActivityManager;
+import com.quran.labs.androidquran.common.Response;
+import com.quran.labs.androidquran.util.QuranExecutorService;
+import com.quran.labs.androidquran.util.QuranPageTask;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
-import android.support.v4.util.LruCache;
-import android.util.Log;
-import android.widget.ImageView;
+import android.os.Handler;
+import android.os.Message;
 
-import com.crashlytics.android.Crashlytics;
-import com.quran.labs.androidquran.util.AsyncTask;
-import com.quran.labs.androidquran.util.QuranScreenInfo;
-
-import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 public class QuranPageWorker {
-   private static final String TAG = "QuranPageWorker";
-   
-   private Context mContext;
-   private Resources mResources;
-   private static QuranPageWorker mInstance;
-   private LruCache<String, BitmapDrawable> mMemoryCache = null;
+  private static final int MSG_IMAGE_LOADED = 1;
 
-   public static synchronized QuranPageWorker getInstance(Context context){
-     if (mInstance == null){
-       mInstance = new QuranPageWorker(context);
-     }
-     return mInstance;
-   }
+  private volatile static QuranPageWorker sInstance;
 
-   private QuranPageWorker(Context context){
-      mContext = context.getApplicationContext();
-      mResources = context.getResources();
+  private Context mContext;
+  private Resources mResources;
 
-      final int memClass = ((ActivityManager)context.getSystemService(
-            Context.ACTIVITY_SERVICE)).getMemoryClass();
-      final int cacheSize = 1024 * 1024 * memClass / 8;
-      final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-      Crashlytics.log(Log.DEBUG, TAG, "memory class: " + memClass +
-         ", cache size: " + cacheSize + ", max memory: " + maxMemory);
-      mMemoryCache = new LruCache<String, BitmapDrawable>(cacheSize){
-         @Override
-         protected void entryRemoved(boolean evicted, String key,
-                                     BitmapDrawable oldValue,
-                                     BitmapDrawable newValue){
-            if (RecyclingBitmapDrawable.class.isInstance(oldValue)){
-               ((RecyclingBitmapDrawable)oldValue).setIsCached(false);
-            }
-         }
+  private static final ExecutorService sExecutorService =
+      new QuranExecutorService();
 
-         @Override
-         protected int sizeOf(String key, BitmapDrawable bitmapDrawable){
-             Bitmap bitmap = bitmapDrawable.getBitmap();
-             if (Build.VERSION.SDK_INT >= 12){
-                 return bitmap.getByteCount();
-             }
-
-             Crashlytics.log(Log.DEBUG, TAG, "row bytes: " +
-                  bitmap.getRowBytes() + ", height: " +
-                  bitmap.getHeight() + ", " + (bitmap.getRowBytes() *
-                        bitmap.getHeight()));
-             return bitmap.getRowBytes() * bitmap.getHeight();
-         }
-      };
-
-      Crashlytics.log(Log.DEBUG, TAG,
-          "initial LruCache size: " + (memClass/8));
-   }
-   
-   private void addBitmapToCache(String key, BitmapDrawable drawable) {
-      if (drawable != null && getBitmapFromCache(key) == null) {
-         if (RecyclingBitmapDrawable.class.isInstance(drawable)) {
-            ((RecyclingBitmapDrawable)drawable).setIsCached(true);
-         }
-         mMemoryCache.put(key, drawable);
-         Crashlytics.log(Log.DEBUG, TAG, "cache size: " + mMemoryCache.size());
+  private static class WorkerHandler extends Handler {
+    @Override
+    public void handleMessage(Message msg) {
+      if (msg.what == MSG_IMAGE_LOADED && sInstance != null) {
+        sInstance.onImageLoaded((QuranPageTask.QuranTaskData) msg.obj);
       }
-      
-      Crashlytics.log(Log.DEBUG, TAG, "cache: number of puts: " +
-          mMemoryCache.putCount() +
-            ", number of evicts: " + mMemoryCache.evictionCount());
-   }
+    }
+  }
 
-   private BitmapDrawable getBitmapFromCache(String key) {
-      return mMemoryCache.get(key);
-   }
+  private static final Handler sHandler = new WorkerHandler();
 
-   public void loadPage(String widthParam, int page, ImageView imageView){
-      final BitmapDrawable drawable = getBitmapFromCache(page + widthParam);
-      if (drawable != null){
-         imageView.setImageDrawable(drawable);
+  public static synchronized QuranPageWorker getInstance(Context context) {
+    if (sInstance == null) {
+      sInstance = new QuranPageWorker(context);
+    }
+    return sInstance;
+  }
+
+  public static void submitResult(QuranPageTask.QuranTaskData quranTaskData) {
+    final Message message = sHandler.obtainMessage(
+        MSG_IMAGE_LOADED, quranTaskData);
+    sHandler.sendMessage(message);
+  }
+
+  private QuranPageWorker(Context context) {
+    mContext = context.getApplicationContext();
+    mResources = mContext.getResources();
+  }
+
+  public Future<?> loadPage(String widthParam, int page, AyahTracker tracker) {
+    QuranPageTask task = new QuranPageTask(mContext,
+        widthParam, tracker, page);
+    return sExecutorService.submit(task);
+  }
+
+  // once complete, see if ImageView is still around and set bitmap.
+  protected void onImageLoaded(QuranPageTask.QuranTaskData quranTaskData) {
+    final Response response = quranTaskData.getResponse();
+    BitmapDrawable drawable = null;
+    if (response != null) {
+      final Bitmap bitmap = response.getBitmap();
+      if (bitmap != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+          drawable = new BitmapDrawable(mResources, bitmap);
+        } else {
+          drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+        }
       }
-      else {
-         // AsyncTask included in our code now and by default
-         // uses a SerialExecutor (or a SingleThreadExecutor on
-         // pre honeycomb devices).
-         QuranPageWorkerTask task = new QuranPageWorkerTask(
-                 widthParam, imageView);
-         task.execute(page);
-      }
-   }
+    }
 
-   private class QuranPageWorkerTask extends
-           AsyncTask<Integer, Void, BitmapDrawable> {
-      private final WeakReference<ImageView> mImageViewReference;
-      private int data = 0;
-      private String mWidthParam;
-
-      public QuranPageWorkerTask(String widthParam, ImageView imageView) {
-         mWidthParam = widthParam;
-         // use a WeakReference to ensure the ImageView can be garbage collected
-         mImageViewReference = new WeakReference<ImageView>(imageView);
-      }
-
-      @Override
-      protected BitmapDrawable doInBackground(Integer... params) {
-         data = params[0];
-         Bitmap bitmap = null;
-         OutOfMemoryError oom = null;
-
-         try {
-            bitmap = QuranDisplayHelper.getQuranPage(
-                 mContext, mWidthParam, data);
-         } catch (OutOfMemoryError me){
-           Crashlytics.log(Log.WARN, TAG,
-               "out of memory exception loading page " +
-               data + ", " + mWidthParam);
-           oom = me;
-         }
-
-         if (bitmap == null){
-           Crashlytics.log(Log.WARN, TAG, "cache memory: " +
-               mMemoryCache.size() + " vs " + mMemoryCache.maxSize());
-            if (QuranScreenInfo.getInstance().isTablet(mContext)){
-               Crashlytics.log(Log.WARN, TAG,
-                   "tablet got bitmap null, trying alternate width...");
-               String param = QuranScreenInfo.getInstance().getWidthParam();
-               if (param.equals(mWidthParam)){
-                  param = QuranScreenInfo.getInstance().getTabletWidthParam();
-               }
-               bitmap = QuranDisplayHelper.getQuranPage(mContext, param, data);
-               if (bitmap == null){
-                  Crashlytics.log(Log.WARN, TAG, "bitmap still null, giving up...");
-               }
-            }
-            Crashlytics.log(Log.WARN, TAG, "got bitmap back as null...");
-         }
-
-         BitmapDrawable drawable = null;
-         if (bitmap != null){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-               drawable = new BitmapDrawable(mResources, bitmap);
-            }
-            else {
-               drawable = new RecyclingBitmapDrawable(mResources, bitmap);
-            }
-
-            addBitmapToCache(data + mWidthParam, drawable);
-         } else if (oom != null){
-           // throw the exception since we couldn't handle it
-           throw oom;
-         }
-
-         return drawable;
-      }
-
-      // once complete, see if ImageView is still around and set bitmap.
-      @Override
-      protected void onPostExecute(BitmapDrawable drawable) {
-         if (drawable != null) {
-            final ImageView imageView = mImageViewReference.get();
-            if (imageView != null) {
-               imageView.setImageDrawable(drawable);
-            }
-            else { Log.w(TAG, "failed to set bitmap in imageview"); }
-         }
-      }
-   }
+    final AyahTracker ayahTracker =
+        quranTaskData.getAyahTrackerReference().get();
+    if (ayahTracker != null) {
+      ayahTracker.onLoadImageResponse(drawable,
+          Response.lightResponse(response));
+    }
+  }
 }

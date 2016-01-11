@@ -1,17 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">قرآن‎</string>
+    <string name="app_name">قرآن</string>
     <string name="downloadPrompt_title">حمل الملفات المطلوبه؟</string>
-    <string name="downloadPrompt">لأداء أفضل، بعض الملفات في حاجه للتحميل على بطاقة الذاكرة الرقمية.
-		 إذا لم تقم بذلك الاختيار فإن الصفحات ستستغرق وقت أطول للتحميل.
-		 هل ترغب في تحميل الملفات الآن؟</string>
+    <string name="downloadPrompt"> لكي يعمل التطبيق بنجاح تحتاج لتحميل بعض الملفات الان. إن لم يتم التحميل الان قد لا يعمل التطبيق بشكل صحيح و ستحتاج للاتصال بالنت للقراءة.هل تود التحميل الان؟</string>
     <string name="downloadImportantPrompt">هناك تحديث هام صغير على ملفات الصور على هاتفكم. هل تود  تحميل الملف حالا؟</string>
     <string name="downloadPrompt_ok">نعم</string>
     <string name="downloadPrompt_no">لا</string>
     <string name="downloading_title">جاري التحميل....</string>
     <string name="downloading_message">يرجى الإنتظار حتى نهاية التحميل</string>
-    <string name="extracting_title">تجهيز&#8230;</string>
+    <string name="extracting_title">تجهيز…</string>
     <string name="menu_about">عنا</string>
+    <string name="menu_other_apps">تطبيقات اخرى‎</string>
     <string name="menu_settings">الإعدادات</string>
     <string name="menu_jump_last_page">الصفحة الأخيرة</string>
     <string name="menu_tags">التصنيفات</string>
@@ -21,7 +20,6 @@
     <string name="menu_sort">تغير الترتيب</string>
     <string name="menu_sort_date">تاريخ الإضافة</string>
     <string name="menu_sort_location">موقعها في القرآن</string>
-    <string name="menu_sort_alphabetical">أبجدي</string>
     <string name="menu_translation">التفسير/الترجمة</string>
     <string name="menu_back_to_page">إلى التلاوة</string>
     <string name="menu_help">مساعدة</string>
@@ -30,36 +28,47 @@
     <string name="menu_jump">انتقال سريع</string>
     <string name="gotoPage">ادخل رقم الصفحة</string>
     <string name="cancel">الغاء</string>
-    <string name="developedBy">لا تنسونا من صالح دعاءكم</string>
-    <string name="copyRights">حقوق الطبع محفوظة لجميع المسلمين</string>
 
     <string name="help_title">الاسئلة المتداولة</string>
     <string name="help">
-        &lt;b>كيف يتم تشغيل الصوت؟&lt;/b>
-        &lt;br/>
+        &lt;b&gt;كيف يتم تشغيل الصوت؟&lt;/b&gt;
+        &lt;br/&gt;
         افتح صفحه القرآن ، انقر على الصفحه مرة واحده . في اسفل الصفحه ستجد زر تشغيل الصوت و اسم القارئ الذي تود تحميله. لاختيار القارئ انقر على اسم القارئ الموجود ليظهر لك باقي قائمة القراء.ولتحميل الصوت اضغط على زر التشغيل للتحميل وللاستماع للصفحه التي انت عليها او لتحميل السورة.
-        &lt;br/>
-        &lt;br/>&lt;b>كيف احصل على الترجمة؟&lt;/b>
-        &lt;br/>افتح صفحه من المصحف ، انقر على الشاشه مرة واحده .. سيظهر لك شريط بالاعلى ، ستجد ايكونه بالاعلى على شكل كرة ارضيه  (وقد تجد ايكونه الترجمه في بعض الاجهزة مدرجه تحت زر القائمة الموجود بالشريط العلوي الذي على شكل ثلاث نقاط بالطول ) بالنقر عليها ستذهب بك لصفحه يمكنك من خلالها اختيار وتحميل الترجمة التي تود تحميلها وبعد التحميل عد مرة اخرى و انقر على ايكونه الكرة الارضيه لترى الترجمة التي تم تحميلها. .
-        &lt;br/>
-        &lt;br/>&lt;b>كيف يتم اضافه صفحة للمرجعيات؟&lt;/b>
-        &lt;br/>انقر على الصفحه التي تود اضافتها للمرجعيات، سيظهر لك شريط بالاعلى وعلى يمين الشريط ستجد ايكون على شكل نجمة بالنقر عليها سيتم تغير شكلها  إلى شكل مصمت وبالتالي تم حفظ الصفحىة للمرجعيات. و لحذف تلك الصفحه من المرجعيات قم مره اخرى بالذهاب لتلك الصفحه وانقر مرة أخرى على النجمة لالغاء كونها من المرجعيات.
-        &lt;br/>
-        &lt;br/>&lt;b>كيف يمكنني تكبير الخط ؟&lt;/b>
-        &lt;br/> للصفحات العربي يمكنك وضع جهازك على الوضع الأفقي، يمكنك من خلال ذلك الحصول على حجم اكبر للخط. وللترجمة اذهب للإعدادات و اختر حجم الترجمة.
-        &lt;br/>
-        &lt;br/>&lt;b>كيف يمكنني ارسال اية ؟&lt;/b>
-        &lt;br/>
+        &lt;br/&gt;
+        &lt;br/&gt;&lt;b&gt;كيف احصل على الترجمة؟&lt;/b&gt;
+        &lt;br/&gt;افتح صفحه من المصحف ، انقر على الشاشه مرة واحده .. سيظهر لك شريط بالاعلى ، ستجد ايكونه بالاعلى على شكل كرة ارضيه  (وقد تجد ايكونه الترجمه في بعض الاجهزة مدرجه تحت زر القائمة الموجود بالشريط العلوي الذي على شكل ثلاث نقاط بالطول ) بالنقر عليها ستذهب بك لصفحه يمكنك من خلالها اختيار وتحميل الترجمة التي تود تحميلها وبعد التحميل عد مرة اخرى و انقر على ايكونه الكرة الارضيه لترى الترجمة التي تم تحميلها. .
+        &lt;br/&gt;
+        &lt;br/&gt;&lt;b&gt;كيف يتم اضافه صفحة للمرجعيات؟&lt;/b&gt;
+        &lt;br/&gt;انقر على الصفحه التي تود اضافتها للمرجعيات، سيظهر لك شريط بالاعلى وعلى يمين الشريط ستجد ايكون على شكل نجمة بالنقر عليها سيتم تغير شكلها  إلى شكل مصمت وبالتالي تم حفظ الصفحىة للمرجعيات. و لحذف تلك الصفحه من المرجعيات قم مره اخرى بالذهاب لتلك الصفحه وانقر مرة أخرى على النجمة لالغاء كونها من المرجعيات.
+        &lt;br/&gt;
+        &lt;br/&gt;&lt;b&gt;كيف يمكنني تكبير الخط ؟&lt;/b&gt;
+        &lt;br/&gt; للصفحات العربي يمكنك وضع جهازك على الوضع الأفقي، يمكنك من خلال ذلك الحصول على حجم اكبر للخط. وللترجمة اذهب للإعدادات و اختر حجم الترجمة.
+        &lt;br/&gt;
+        &lt;br/&gt;&lt;b&gt;كيف يمكنني ارسال اية ؟&lt;/b&gt;
+        &lt;br/&gt;
         اثناء قراءتك اضغط على الاية ضغطة طويلة ستظهر لك قائمة بها عدة اختيارات منها الارسال ومنها تسجيل الايه في المرجعيات، نسخ الاية، و تفسير الاية.
     </string>
 
     <string name="search_hint">بحث في القران</string>
     <string name="quranSearchType">آيات القران</string>
 
+    <plurals name="files_downloaded">
+        <item quantity="zero">لم يتم تحميل سور بعد‎</item>
+        <item quantity="one">تم تحميل سورة واحده</item>
+        <item quantity="two">تم تحميل سورتان</item>
+        <item quantity="few">تم تحميل %1$d سور</item>
+        <item quantity="many">تم تحميل %1$d سورة</item>
+        <item quantity="other">تم تحميل %1$d سورة</item>
+    </plurals>
+
     <!-- Shown above search results when we receive a search request. -->
     <plurals name="search_results">
-        <item quantity="one"> نتيجة البحث عن \"%s\": </item>
-        <item quantity="other">نتائج البحث عن \"%s\": </item>
+        <item quantity="zero">لا توجد نتائج في البحث عن \"%1$s\"</item>
+        <item quantity="one">نتيجة واحده في البحث عن \"%1$s\"</item>
+        <item quantity="two">نتيجتان في البحث عن \"%1$s\"</item>
+        <item quantity="few">%2$d نتائج في البحث عن \"%1$s\"</item>
+        <item quantity="many">%2$d نتيجة في البحث عن \"%1$s\"</item>
+        <item quantity="other">%2$d نتيجة في البحث عن \"%1$s\"</item>
     </plurals>
 
     <!-- Search messages -->
@@ -88,10 +97,12 @@
     <string name="prefs_night_mode_summary">الخلفية باللون اﻷسود والخطوط باللون اﻷبيض</string>
     <string name="prefs_night_mode_text_brightness_title">إضاءة الخط</string>
     <string name="prefs_night_mode_text_brightness_summary">إضاءة الخط عند تفعيل القراءة الليلية</string>
-    <string name="prefs_overlay_page_info_title">عرض بيانات الصفحة (تجريبية)</string>
+    <string name="prefs_overlay_page_info_title">عرض بيانات الصفحة</string>
     <string name="prefs_overlay_page_info_summary">عرض رقم الصفحة، اسم السورة، ورقم الجزء أثناء القراءة</string>
     <string name="prefs_display_marker_title">التنبيه</string>
     <string name="prefs_display_marker_summary">عرض تنبيه عند الوصول إلى بداية الربع أو الجزء</string>
+    <string name="prefs_highlight_bookmarks_title">تعليم المرجعيات</string>
+    <string name="prefs_highlight_bookmarks_summary">علم الآيات التي وضعت في المرجعيات</string>
     <string name="prefs_translation_text_title">خط التفسير والترجمة</string>
     <string name="prefs_translations">التفسير والترجمة</string>
     <string name="prefs_translations_summary">حمّل واختر التفاسير والتراجم</string>
@@ -102,12 +113,12 @@
     <string name="prefs_streaming_summary"> سيتم تشغيل الملفات عبر اﻻنترنت (لن يتم تنزيل الملفات على الجهاز)، هذا الخيار متاح للتلاوات الغير متصلة فقط</string>
     <string name="prefs_download_amount_title">كم التحميل</string>
     <string name="prefs_download_amount_summary">كم التحميل للتلاوات الغير متصلة</string>
-    <string name="prefs_advanced_settings_title">إعدادات متقدمة</string>
+    <string name="prefs_audio_manager">إدارة الصوتيات (تجريبي)</string>
+    <string name="prefs_audio_manager_summary">تحميل وإدارة الملفات الصوتية</string>
     <string name="prefs_app_location_title">مكان التطبيق</string>
     <string name="prefs_app_location_summary">اختر الذاكرة التي سيتم تخزين الملفات عليها</string>
     <string name="prefs_sdcard_internal">الذاكرة الداخلية</string>
-    <string name="prefs_sdcard_external">الذاكرة الخارجية</string>
-    <string name="prefs_sdcard_auto">تلقائي</string>
+    <string name="prefs_sdcard_external">الذاكرة الخارجية %1$d</string>
     <string name="prefs_app_size">مساحة التطبيق</string>
     <string name="prefs_calculating_app_size">جاري حساب مساحة التطبيق</string>
     <string name="prefs_copying_app_files">جاري نسخ ملفات التطبيق</string>
@@ -136,35 +147,38 @@
     <string name="quran_juz2">الجزء</string>
     <string name="quran_page">الصفحة</string>
     <string name="quran_sura">سورة</string>
-    <string name="quran_ayah">آية</string>
-    <string name="quran_sura_title">سورة</string>
+    <string name="quran_ayah">آية %1$d</string>
+    <string name="quran_ayah_details">%1$s - آية %2$s، جزء %3$s</string>
+    <string name="quran_sura_title">سورة %1$s</string>
     
-        <string name="sura_ayah_notification_str">سورة %1$s, آية %2$d</string>
+    <string name="sura_ayah_notification_str">سورة %1$s, آية %2$d</string>
 
     <string name="bookmarks_current_page">الصفحة الحالية</string>
     <string name="index_loading">جاري التحميل…</string>
 
-    <string name="canceling">جاري إلغاء اﻷمر&#8230;</string>
+    <string name="canceling">جاري إلغاء اﻷمر…</string>
     <string name="juz2_description">الجزء %1$s</string>
     <string name="page_description">صفحة %1$s, جزء %2$s</string>
     <string name="highlighting_database">جاري تحميل الملفات المطلوبة</string>
     <string name="timing_database">جاري تحميل الملفات المطلوبة</string>
-    <string name="infinity">&#8734;</string>
     
     <!-- download statuses and errors -->
     <string name="download_successful">تم التحميل</string>   
-    <string name="download_processing">جاري تجهيز الملفات&#8230;</string>              
+    <string name="download_processing">جاري تجهيز الملفات…</string>              
     <string name="download_error_general">لم يتم تحميل الملفات</string>             
     <string name="download_error_disk">لا توجد مساحة كافية للتخزين</string>               
     <string name="download_error_network">لا يمكن اﻻتصال بالانترنت</string>                    
     <string name="download_error_perms">الصلاحيات غير كافية لتحميل الملفات</string>                  
     <string name="download_error_invalid_download">الملفات المحملة تالفة</string>
     <string name="download_error_invalid_download_retry">هناك ملف تالف، جاري إعادة التحميل</string> 
-    <string name="download_error_network_retry">لا يمكن اﻻتصال بالانترنت، جاري إعادة المحاولة&#8230;</string>
+    <string name="download_error_network_retry">لا يمكن اﻻتصال بالانترنت، جاري إعادة المحاولة…</string>
     <string name="notification_download_canceled">تم إلغاء التحميل</string>
+    <string name="sdcard_error">لم يتم العثور على بطاقه الذاكرة الرقمية. اعد وضعها و حاول مرة اخرى.</string>
     
     <!-- downloading dialogs -->
     <string name="download_progress">تم تحميل %1$s / %2$s</string>
+    <string name="download_sura_progress">جاري التحميل من سورة %3$d - %1$s / %2$s</string>
+    <string name="download_sura_ayah_progress">جاري تحميل السورة %1$d الأية %2$d</string>
     <string name="process_progress">جاري اﻹعداد %1$d / %2$d</string>
     <string name="download_retry">اعد المحاولة</string>
     <string name="download_cancel">إلغاء</string>
@@ -187,27 +201,42 @@
     <string name="makki">مكية</string>
     <string name="madani">مدنية</string>
     <plurals name="verses">
+        <item quantity="zero">آية</item>
         <item quantity="one">آية</item>
-        <item quantity="few">آيات</item>
-        <item quantity="many">آية</item>
-        <item quantity="other">آية</item>
+        <item quantity="two">آيتان</item>
+        <item quantity="few">%s آيات</item>
+        <item quantity="many">%s آية</item>
+        <item quantity="other">%s آية</item>
     </plurals>
+
+    <!-- ayah action panel -->
+    <string name="play_from">من</string>
+    <string name="play_to">إلى</string>
+    <string name="play_restrict_range"> شغل ما تم اختياره من الايات فقط</string>
+    <string name="play_verses_range">تشغيل مجموعة الآيات:</string>
+    <string name="play_each_verse">تشغيل كل اية :</string>
+    <string name="play_apply">تطبيق</string>
+    <string name="play_apply_and_play">تطبيق وتشغيل</string>
+
+    <string-array name="repeatValues">
+        <item>مرة واحدة</item>
+        <item>مرتان</item>
+        <item>ثلاث مرات</item>
+        <item>لانهائي</item>
+    </string-array>
 
     <!-- long press -->
     <string name="bookmark_ayah">أضف الآية إلى المرجعيات</string>
-    <string name="unbookmark_ayah">حذف الآية من المرجعيات</string>
     <string name="tag_ayah">تصنيف الآية</string>
     <string name="share_ayah">شارك رابط الآية</string>
     <string name="share_ayah_text">شارك نص الآية</string>
     <string name="translation_ayah">تفسير/ترجمة الآية</string>
     <string name="play_from_here">بدء التلاوة من هذه الآية</string>
-    <string name="ayah_notes">ملاحظات</string>
-   	<string name="via_string">\n\nبواسطة @QuranAndroid</string>	
+   	<string name="via_string">بواسطة @QuranAndroid</string>
     <string name="search_key">للبحث عن آية</string>
     <string name="copy_ayah">نسخ الآية</string>
     <string name="ayah_copied_popup">تم نسخ الآية</string>
-    <string name="show_more">المزيد</string>
-    
+
     <!-- bookmarks & tags contextual action bar -->
     <string name="delete_bookmark">حذف المرجعية</string>
     <string name="tag_bookmark">تصنيف المرجعية</string>
@@ -223,4 +252,38 @@
     <!-- bookmark & tag list -->
     <string name="bookmarks_list_empty">لا توجد أي مرجعيات</string>
     <string name="tags_list_empty">لا توجد أي تصنيفات</string>
-</resources>
+
+    <!-- audio manager -->
+    <string name="audio_manager">إدارة الصوتيات</string>
+    <string name="prefs_use_arabic_summary_on">سيتم تحويل التطبيق إلى اللغة العربية</string>
+    <string name="prefs_use_arabic_title">الوضع العربي</string>
+    <string name="play">تشغيل</string>
+    <string name="stop">إيقاف</string>
+
+    <string name="downloadTabletPrompt">تم تحسين الصور الخاصه بالتابلت. هل تود تحميلها الان؟</string>
+    <string name="menu_sort_group_by_tags">رتب حسب للتصنيفات</string>
+    <string name="about_description">هذا التطبيق مجانا.لا تنسونا من صالح دعاءكم.</string>
+    <string name="about_data_sources">مصدار المعلومات</string>
+    <string name="about_images">الصور</string>
+    <string name="about_madani_images">صور صفحات القران الموجودة بالتطبيق مصدرها مجمع الملك فهد لطباعة المصف الشريف بالمدينة المنورة</string>
+    <string name="about_naskh_images">صور صفحات القران الموجودة بتطبيق النسخ مأخوذه بتصريح من SHL Info Systems</string>
+    <string name="prefs_category_advanced">خيارات متقدمة</string>
+    <string name="prefs_export_title">تصدير</string>
+    <string name="prefs_export_summary">تصدير نسخة من المرجعيات و التصنيفات.</string>
+
+    <string name="import_data">استيراد البيانات</string>
+    <string name="import_data_and_override">"اذا قمت باستيراد هذا الملف، سيتم استبدال المرجعيات ب  %1$d مرجعيات و %2$d تصنيفات. استيراد؟"</string>
+    <string name="import_successful">تم الاستيراد بنجاح</string>
+    <string name="export_data_error">خطأ في استيراد البيانات.</string>
+    <string name="warning">تحذير</string>
+
+    <plurals name="bookmark_tag_deleted">
+        <item quantity="zero">لم يتم حذف عناصر</item>
+	    <item quantity="one">تم حذف عنصر واحد</item>
+        <item quantity="two">تم حذف عنصران</item>
+	    <item quantity="few">تم حذف %d عناصر</item>
+        <item quantity="many">تم حذف %d عنصر</item>
+    </plurals>
+    <string name="undo">تراجع</string>
+
+    </resources>

@@ -1,88 +1,117 @@
 package com.quran.labs.androidquran.ui.fragment;
 
-import android.app.Activity;
-import android.app.AlertDialog;
+import com.quran.labs.androidquran.R;
+import com.quran.labs.androidquran.dao.Tag;
+import com.quran.labs.androidquran.presenter.bookmark.AddTagDialogPresenter;
+
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
-import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.quran.labs.androidquran.R;
 
-public class AddTagDialog extends SherlockDialogFragment {
-   public static final String TAG = "AddTagDialog";
+public class AddTagDialog extends DialogFragment {
 
-   private long mId = -1;
-   private String mName;
+  public static final String TAG = "AddTagDialog";
 
-   private static final String ID = "id";
-   private static final String NAME = "name";
+  private static final String EXTRA_ID = "id";
+  private static final String EXTRA_NAME = "name";
 
-   public AddTagDialog(){
-   }
+  private AddTagDialogPresenter mAddTagDialogPresenter;
 
-   public AddTagDialog(long id, String name){
-      mId = id;
-      mName = name;
-   }
+  public static AddTagDialog newInstance(long id, String name) {
+    final Bundle args = new Bundle();
+    args.putLong(EXTRA_ID, id);
+    args.putString(EXTRA_NAME, name);
+    final AddTagDialog dialog = new AddTagDialog();
+    dialog.setArguments(args);
+    return dialog;
+  }
 
-   @Override
-   public void onSaveInstanceState(Bundle outState) {
-      outState.putLong(ID, mId);
-      outState.putString(NAME, mName);
-      super.onSaveInstanceState(outState);
-   }
+  public AddTagDialog() {
+  }
 
-   @Override
-   public Dialog onCreateDialog(Bundle savedInstanceState) {
-      if (savedInstanceState != null){
-         mId = savedInstanceState.getLong(ID, -1);
-         mName = savedInstanceState.getString(NAME);
-      }
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    mAddTagDialogPresenter = new AddTagDialogPresenter(context);
+  }
 
-      LayoutInflater inflater = getActivity().getLayoutInflater();
-      View layout = inflater.inflate(R.layout.tag_dialog, null);
+  @Override
+  public void onStart() {
+    super.onStart();
+    mAddTagDialogPresenter.bind(this);
+  }
 
-      AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-      builder.setTitle(getString(R.string.tag_dlg_title));
+  @Override
+  public void onStop() {
+    mAddTagDialogPresenter.unbind(this);
+    super.onStop();
+  }
 
-      final EditText nameText =
-              (EditText)layout.findViewById(R.id.tag_name);
+  @NonNull
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
+    final Bundle args = getArguments();
 
-      if (mId > -1) {
-         nameText.setText(mName == null? "" : mName);
-      }
+    final long id;
+    final String name;
+    if (args != null) {
+      id = args.getLong(EXTRA_ID, -1);
+      name = args.getString(EXTRA_NAME);
+    } else {
+      id = -1;
+      name = null;
+    }
 
-      builder.setView(layout);
-      builder.setPositiveButton(getString(R.string.dialog_ok),
-              new DialogInterface.OnClickListener() {
-                 @Override
-                 public void onClick(DialogInterface dialog, int which) {
-                    Activity activity = getActivity();
-                    if (activity != null &&
-                        activity instanceof OnTagChangedListener){
-                       OnTagChangedListener listener =
-                               (OnTagChangedListener)activity;
-                       String name = nameText.getText().toString();
-                       if (mId > 0){
-                          listener.onTagUpdated(mId, name);
-                       }
-                       else {
-                          listener.onTagAdded(name);
-                       }
-                    }
+    LayoutInflater inflater = getActivity().getLayoutInflater();
+    View layout = inflater.inflate(R.layout.tag_dialog, null);
 
-                    dialog.dismiss();
-                 }
-              });
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setTitle(getString(R.string.tag_dlg_title));
 
-      return builder.create();
-   }
+    final EditText nameText =
+        (EditText) layout.findViewById(R.id.tag_name);
 
-   public interface OnTagChangedListener {
-      public void onTagAdded(String name);
-      public void onTagUpdated(long id, String name);
-   }
+    if (id > -1) {
+      nameText.setText(name == null ? "" : name);
+    }
+
+    builder.setView(layout);
+    builder.setPositiveButton(getString(R.string.dialog_ok),
+        new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            String name = nameText.getText().toString();
+            if (id > 0) {
+              mAddTagDialogPresenter.updateTag(new Tag(id, name));
+            } else {
+              mAddTagDialogPresenter.addTag(name);
+            }
+
+            dismiss();
+          }
+        });
+
+    return builder.create();
+  }
+
+  @Override
+  public void onActivityCreated(Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+  }
+
+  public interface OnTagChangedListener {
+
+    void onTagAdded(String name);
+
+    void onTagUpdated(Tag tag);
+  }
 }

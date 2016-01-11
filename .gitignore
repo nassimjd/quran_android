@@ -12,5 +12,10 @@ gen-external-apklibs
 classes
 ApiKeys.java
 .gradle
-*/build
+app/src/beta
 app/src/release
+app/seed.txt
+build/
+*/crashlytics.properties
+crashlytics-build.properties
+com_crashlytics_export_strings.xml

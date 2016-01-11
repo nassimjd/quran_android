@@ -1,30 +1,30 @@
 package com.quran.labs.androidquran.ui.fragment;
 
+import com.quran.labs.androidquran.common.Response;
+import com.quran.labs.androidquran.data.QuranInfo;
+import com.quran.labs.androidquran.task.TranslationTask;
+import com.quran.labs.androidquran.ui.PagerActivity;
+import com.quran.labs.androidquran.ui.helpers.AyahTracker;
+import com.quran.labs.androidquran.ui.helpers.HighlightType;
+import com.quran.labs.androidquran.util.QuranSettings;
+import com.quran.labs.androidquran.widgets.AyahToolBar;
+import com.quran.labs.androidquran.widgets.QuranTranslationPageLayout;
+import com.quran.labs.androidquran.widgets.TranslationView;
+
 import android.app.Activity;
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.quran.labs.androidquran.R;
-import com.quran.labs.androidquran.data.Constants;
-import com.quran.labs.androidquran.data.QuranInfo;
-import com.quran.labs.androidquran.ui.PagerActivity;
-import com.quran.labs.androidquran.ui.helpers.AyahTracker;
-import com.quran.labs.androidquran.ui.helpers.QuranDisplayHelper;
-import com.quran.labs.androidquran.ui.util.TranslationTask;
-import com.quran.labs.androidquran.widgets.TranslationView;
+import java.util.Set;
 
-public class TranslationFragment extends SherlockFragment
+public class TranslationFragment extends Fragment
     implements AyahTracker {
-  private static final String TAG = "TranslationPageFragment";
   private static final String PAGE_NUMBER_EXTRA = "pageNumber";
 
   private static final String SI_PAGE_NUMBER = "SI_PAGE_NUMBER";
@@ -33,13 +33,11 @@ public class TranslationFragment extends SherlockFragment
   private int mPageNumber;
   private int mHighlightedAyah;
   private TranslationView mTranslationView;
-  private PaintDrawable mLeftGradient, mRightGradient = null;
 
-  private View mMainView;
-  private ImageView mLeftBorder, mRightBorder;
+  private QuranTranslationPageLayout mMainView;
 
   private Resources mResources;
-  private SharedPreferences mPrefs;
+  private QuranSettings mQuranSettings;
   private boolean mJustCreated;
 
   public static TranslationFragment newInstance(int page) {
@@ -65,31 +63,19 @@ public class TranslationFragment extends SherlockFragment
         }
       }
     }
-    int width = getActivity().getWindowManager()
-        .getDefaultDisplay().getWidth();
-    mLeftGradient = QuranDisplayHelper.getPaintDrawable(width, 0);
-    mRightGradient = QuranDisplayHelper.getPaintDrawable(0, width);
     setHasOptionsMenu(true);
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
-    final View view = inflater.inflate(
-        R.layout.translation_layout, container, false);
-    view.setBackgroundDrawable((mPageNumber % 2 == 0 ?
-        mLeftGradient : mRightGradient));
-
-    mPrefs = PreferenceManager
-        .getDefaultSharedPreferences(getActivity());
+    Context context = getActivity();
+    mMainView = new QuranTranslationPageLayout(context);
+    mMainView.setPageController(null, mPageNumber);
+    mQuranSettings = QuranSettings.getInstance(context);
     mResources = getResources();
 
-
-    mLeftBorder = (ImageView) view.findViewById(R.id.left_border);
-    mRightBorder = (ImageView) view.findViewById(R.id.right_border);
-
-    mTranslationView = (TranslationView) view
-        .findViewById(R.id.translation_text);
+    mTranslationView = mMainView.getTranslationView();
     mTranslationView.setTranslationClickedListener(
         new TranslationView.TranslationClickedListener() {
           @Override
@@ -101,53 +87,37 @@ public class TranslationFragment extends SherlockFragment
           }
         });
 
-    mMainView = view;
     updateView();
     mJustCreated = true;
 
-    String database = mPrefs.getString(
-        Constants.PREF_ACTIVE_TRANSLATION, null);
+    String database = mQuranSettings.getActiveTranslation();
     refresh(database);
-    return view;
+    return mMainView;
   }
 
-  private void updateView() {
+  @Override
+  public void onLoadImageResponse(BitmapDrawable drawable, Response response) {
+    // no op, we're not requesting images here
+  }
+
+  public void updateView() {
     if (getActivity() == null || mResources == null ||
         mMainView == null || !isAdded()) {
       return;
     }
 
-    mMainView.setBackgroundDrawable((mPageNumber % 2 == 0 ?
-        mLeftGradient : mRightGradient));
-
-    if (!mPrefs.getBoolean(Constants.PREF_USE_NEW_BACKGROUND, true)) {
-      mMainView.setBackgroundColor(mResources.getColor(R.color.page_background));
-    }
-    if (mPrefs.getBoolean(Constants.PREF_NIGHT_MODE, false)) {
-      mMainView.setBackgroundColor(Color.BLACK);
-    }
-
-    int lineImageId = R.drawable.dark_line;
-    int leftBorderImageId = R.drawable.border_left;
-    int rightBorderImageId = R.drawable.border_right;
-    if (mPrefs.getBoolean(Constants.PREF_NIGHT_MODE, false)) {
-      leftBorderImageId = R.drawable.night_left_border;
-      rightBorderImageId = R.drawable.night_right_border;
-      lineImageId = R.drawable.light_line;
-    }
-
-    if (mPageNumber % 2 == 0) {
-      mRightBorder.setVisibility(View.GONE);
-      mLeftBorder.setBackgroundResource(leftBorderImageId);
-    } else {
-      mRightBorder.setVisibility(View.VISIBLE);
-      mRightBorder.setBackgroundResource(rightBorderImageId);
-      mLeftBorder.setBackgroundResource(lineImageId);
-    }
+    final boolean nightMode = mQuranSettings.isNightMode();
+    final boolean useNewBackground = mQuranSettings.useNewBackground();
+    mMainView.updateView(nightMode, useNewBackground);
   }
 
   @Override
-  public void highlightAyah(int sura, int ayah) {
+  public void highlightAyah(int sura, int ayah, HighlightType type) {
+    highlightAyah(sura, ayah, type, true);
+  }
+
+  @Override
+  public void highlightAyah(int sura, int ayah, HighlightType type, boolean scrollToAyah) {
     if (mTranslationView != null) {
       mHighlightedAyah = QuranInfo.getAyahId(sura, ayah);
       mTranslationView.highlightAyah(mHighlightedAyah);
@@ -155,7 +125,27 @@ public class TranslationFragment extends SherlockFragment
   }
 
   @Override
-  public void unHighlightAyat() {
+  public AyahToolBar.AyahToolBarPosition getToolBarPosition(int sura, int ayah,
+      int toolBarWidth, int toolBarHeight) {
+    // not yet implemented
+    return null;
+  }
+
+  @Override
+  public void highlightAyat(
+      int page, Set<String> ayahKeys, HighlightType type) {
+    // not yet supported
+  }
+
+  @Override
+  public void unHighlightAyah(int sura, int ayah, HighlightType type) {
+    if (mHighlightedAyah == QuranInfo.getAyahId(sura, ayah)) {
+      unHighlightAyahs(type);
+    }
+  }
+
+  @Override
+  public void unHighlightAyahs(HighlightType type) {
     if (mTranslationView != null) {
       mTranslationView.unhighlightAyat();
       mHighlightedAyah = -1;

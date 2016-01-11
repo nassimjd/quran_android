@@ -1,326 +1,251 @@
 package com.quran.labs.androidquran.ui.fragment;
 
-import android.app.Activity;
-import android.app.AlertDialog;
+import com.quran.labs.androidquran.R;
+import com.quran.labs.androidquran.dao.Tag;
+import com.quran.labs.androidquran.data.SuraAyah;
+import com.quran.labs.androidquran.presenter.bookmark.TagBookmarkPresenter;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
-import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.quran.labs.androidquran.R;
-import com.quran.labs.androidquran.database.BookmarksDBAdapter;
-import com.quran.labs.androidquran.database.BookmarksDBAdapter.Tag;
-import com.quran.labs.androidquran.ui.helpers.BookmarkHandler;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
-public class TagBookmarkDialog extends SherlockDialogFragment {
-   public static final String TAG = "TagBookmarkDialog";
+public class TagBookmarkDialog extends DialogFragment {
 
-   private long mBookmarkId = -1;
-   private long[] mBookmarkIds = null;
-   private Integer mSura;
-   private Integer mAyah;
-   private int mPage = -1;
-   private List<Tag> mTags;
-   private List<Long> mBookmarkTags;
-   private TagsAdapter mAdapter;
+  public static final String TAG = "TagBookmarkDialog";
+  private static final String EXTRA_BOOKMARK_IDS = "bookmark_ids";
 
-   private ListView mListView;
+  private TagsAdapter mAdapter;
+  private TagBookmarkPresenter mTagBookmarkPresenter;
 
-   private static final String BOOKMARK_ID = "bookmarkid";
-   private static final String BOOKMARK_IDS = "bookmarkids";
-   private static final String PAGE = "page";
-   private static final String SURA = "sura";
-   private static final String AYAH = "ayah";
-   private static final String TAG_LIST = "taglist";
 
-   public TagBookmarkDialog(long bookmarkId){
-      mBookmarkId = bookmarkId;
-   }
-   
-   public TagBookmarkDialog(long[] bookmarkIds){
-      mBookmarkIds = bookmarkIds;
-   }
-   
-   public TagBookmarkDialog(Integer sura, Integer ayah, int page){
-      mSura = sura;
-      mAyah = ayah;
-      mPage = page;
-   }
+  public static TagBookmarkDialog newInstance(long bookmarkId) {
+    return newInstance(new long[] { bookmarkId });
+  }
 
-   // do not remove - this is required when resuming from onSaveInstanceState
-   public TagBookmarkDialog(){
-   }
+  public static TagBookmarkDialog newInstance(long[] bookmarkIds) {
+    final Bundle args = new Bundle();
+    args.putLongArray(EXTRA_BOOKMARK_IDS, bookmarkIds);
+    final TagBookmarkDialog dialog = new TagBookmarkDialog();
+    dialog.setArguments(args);
+    return dialog;
+  }
 
-   @Override
-   public void onSaveInstanceState(Bundle outState) {
-      outState.putLong(BOOKMARK_ID, mBookmarkId);
-      outState.putLongArray(BOOKMARK_IDS, mBookmarkIds);
-      outState.putInt(PAGE, mPage);
-      outState.putInt(SURA, mSura == null? 0 : mSura);
-      outState.putInt(AYAH, mAyah == null? 0 : mAyah);
-      outState.putParcelableArrayList(TAG_LIST,
-              (ArrayList<? extends Parcelable>) mTags);
-      super.onSaveInstanceState(outState);
-   }
-   
-   public void handleTagAdded(String name) {
-	   new AddTagTask().execute(name);
-   }
+  public TagBookmarkDialog() {
+  }
 
-   @Override
-   public Dialog onCreateDialog(Bundle savedInstanceState) {
-      final FragmentActivity activity = getActivity();
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    mTagBookmarkPresenter = TagBookmarkPresenter.getInstance(context);
+  }
 
-      if (savedInstanceState != null){
-         mBookmarkId = savedInstanceState.getLong(BOOKMARK_ID);
-         mBookmarkIds = savedInstanceState.getLongArray(BOOKMARK_IDS);
-         mSura = savedInstanceState.getInt(SURA);
-         mAyah = savedInstanceState.getInt(AYAH);
-         mPage = savedInstanceState.getInt(PAGE);
-         mTags = savedInstanceState.getParcelableArrayList(TAG_LIST);
+  public void updateAyah(SuraAyah suraAyah) {
+    mTagBookmarkPresenter.setAyahBookmarkMode(suraAyah.sura, suraAyah.ayah, suraAyah.getPage());
+  }
 
-         if (mSura == 0){ mSura = null; }
-         if (mAyah == 0){ mAyah = null; }
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    final Bundle args = getArguments();
+    if (args != null) {
+      long[] bookmarkIds = args.getLongArray(EXTRA_BOOKMARK_IDS);
+
+      if (bookmarkIds != null) {
+        mTagBookmarkPresenter.setBookmarksMode(bookmarkIds);
       }
+    }
+  }
 
-      if (mTags == null) {
-         mTags = new ArrayList<Tag>();
-         new RefreshTagsTask().execute();
+  private ListView createTagsListView() {
+    final FragmentActivity activity = getActivity();
+
+    mAdapter = new TagsAdapter(activity, mTagBookmarkPresenter);
+
+    final ListView listview = new ListView(activity);
+    listview.setAdapter(mAdapter);
+    listview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+    listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Tag tag = (Tag) mAdapter.getItem(position);
+        boolean isChecked = mTagBookmarkPresenter.toggleTag(tag.id);
+
+        Object viewTag = view.getTag();
+        if (viewTag instanceof ViewHolder) {
+          ViewHolder holder = (ViewHolder) viewTag;
+          holder.checkBox.setChecked(isChecked);
+        }
       }
+    });
+    return listview;
+  }
 
-      AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-      mAdapter = new TagsAdapter(activity);
+  public void showAddTagDialog() {
+    Context context = getActivity();
+    if (context instanceof OnBookmarkTagsUpdateListener) {
+      ((OnBookmarkTagsUpdateListener) context).onAddTagSelected();
+    }
+  }
 
-      mListView = new ListView(activity);
-      mListView.setAdapter(mAdapter);
-      mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-      mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Tag tag = (Tag)mAdapter.getItem(position);
-            if (tag.mId >= 0) {
-            	tag.toggle();
-            }
-            else if (tag.mId == -1) {
-	           Context context = getActivity();
-	           if (context != null &&
-                      context instanceof OnBookmarkTagsUpdateListener) {
-                  ((OnBookmarkTagsUpdateListener)context).onAddTagSelected();
-	           }
-            }
+  public void setData(List<Tag> tags, HashSet<Long> checkedTags) {
+    mAdapter.setData(tags, checkedTags);
+    mAdapter.notifyDataSetChanged();
+  }
 
-            if (view.getTag() != null){
-               Object viewTag = view.getTag();
-               if (viewTag instanceof ViewHolder){
-                  ViewHolder holder = (ViewHolder)viewTag;
-                  holder.checkBox.setChecked(tag.isChecked());
-               }
-            }
-         }
+  @NonNull
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setView(createTagsListView());
+    builder.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        // no-op - set in onStart to avoid closing dialog now
+      }
+    });
+    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        dismiss();
+      }
+    });
+    return builder.create();
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+    mTagBookmarkPresenter.bind(this);
+    final Dialog dialog = getDialog();
+    if (dialog instanceof AlertDialog) {
+      final Button positive = ((AlertDialog) dialog)
+          .getButton(Dialog.BUTTON_POSITIVE);
+      positive.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          mTagBookmarkPresenter.saveChanges();
+          dismiss();
+        }
       });
+    }
+  }
 
-      builder.setView(mListView);
-      builder.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-         @Override
-         public void onClick(DialogInterface dialog, int which) {
-             final Activity curAct = getActivity();
-             if (curAct != null &&
-                     curAct instanceof OnBookmarkTagsUpdateListener){
-                 new UpdateBookmarkTagsTask(
-                         (OnBookmarkTagsUpdateListener)curAct).execute();
-             }
-         }
-      });
-      builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-         @Override
-         public void onClick(DialogInterface dialog, int which) {
-            dismiss();
-         }
-      });
-      return builder.create();
-   }
+  @Override
+  public void onStop() {
+    mTagBookmarkPresenter.unbind(this);
+    super.onStop();
+  }
 
-   public class TagsAdapter extends BaseAdapter {
-      private LayoutInflater mInflater;
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+      Bundle savedInstanceState) {
+    // If in dialog mode, don't do anything (or else it will cause exception)
+    if (getShowsDialog()) {
+      return super.onCreateView(inflater, container, savedInstanceState);
+    }
+    // If not in dialog mode, treat as normal fragment onCreateView
+    return createTagsListView();
+  }
 
-      public TagsAdapter(Context context){
-         mInflater = LayoutInflater.from(context);
+  public static class TagsAdapter extends BaseAdapter {
+
+    private LayoutInflater mInflater;
+    private TagBookmarkPresenter mTagBookmarkPresenter;
+
+    private String mNewTagString;
+    private List<Tag> mTags = new ArrayList<>();
+    private HashSet<Long> mCheckedTags = new HashSet<>();
+
+    public TagsAdapter(Context context, TagBookmarkPresenter presenter) {
+      mInflater = LayoutInflater.from(context);
+      mTagBookmarkPresenter = presenter;
+      mNewTagString = context.getString(R.string.new_tag);
+    }
+
+    public void setData(List<Tag> tags, HashSet<Long> checkedTags) {
+      mTags = tags;
+      mCheckedTags = checkedTags;
+    }
+
+    @Override
+    public int getCount() {
+      return mTags == null ? 0 : mTags.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+      return mTags.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+      return mTags.get(position).id;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+      return false;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+      ViewHolder holder;
+      if (convertView == null) {
+        convertView = mInflater.inflate(R.layout.tag_row, parent, false);
+        holder = new ViewHolder();
+        holder.checkBox = (CheckBox) convertView.findViewById(R.id.tag_checkbox);
+        holder.tagName = (TextView) convertView.findViewById(R.id.tag_name);
+        holder.addImage = (ImageView) convertView.findViewById(R.id.tag_add_image);
+        convertView.setTag(holder);
       }
-
-      @Override
-      public int getCount() {
-         return mTags.size();
-      }
-
-      @Override
-      public Object getItem(int position) {
-         return mTags.get(position);
-      }
-
-      @Override
-      public long getItemId(int position) {
-         return mTags.get(position).mId;
-      }
-
-      @Override
-      public boolean hasStableIds() {
-         return false;
-      }
-
-      @Override
-      public View getView(int position, View convertView,
-                          ViewGroup parent) {
-         ViewHolder holder;
-         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.tag_row, null);
-            holder = new ViewHolder();
-            holder.checkBox = (CheckBox)convertView
-                    .findViewById(R.id.tag_checkbox);
-            holder.tagName = (TextView)convertView
-                    .findViewById(R.id.tag_name);
-            holder.addImage = (ImageView)convertView
-                    .findViewById(R.id.tag_add_image);
-            convertView.setTag(holder);
-         }
-         final Tag tag = (Tag)getItem(position);
-         holder = (ViewHolder) convertView.getTag();
-         holder.tagName.setText(tag.toString());
-         if (tag.mId == -1) {
-            holder.addImage.setVisibility(View.VISIBLE);
-            holder.checkBox.setVisibility(View.GONE);
-         }
-         else {
-            holder.addImage.setVisibility(View.GONE);
-            holder.checkBox.setVisibility(View.VISIBLE);
-            holder.checkBox.setChecked(tag.isChecked());
-            holder.checkBox.setOnClickListener(new OnClickListener() {
-               public void onClick(View v) {
-                  tag.toggle();
-               }
-            });
-         }
-         return convertView;
-      }
-   }
-   
-   class RefreshTagsTask extends AsyncTask<Void, Void, Void> {
-      @Override
-      protected Void doInBackground(Void... params) {
-         BookmarksDBAdapter adapter = null;
-         Activity activity = getActivity();
-         if (activity != null && activity instanceof BookmarkHandler) {
-            adapter = ((BookmarkHandler) activity).getBookmarksAdapter();
-         }
-
-         if (adapter == null) {
-            return null;
-         }
-
-         mTags = new ArrayList<Tag>();
-         mTags.addAll(adapter.getTags());
-         mTags.add(new Tag(-1, getString(R.string.new_tag)));
-         if (mBookmarkIds == null) {
-            if (mBookmarkId < 0 && mPage > 0) {
-               mBookmarkId = adapter.getBookmarkId(mSura, mAyah, mPage);
-            }
-            mBookmarkTags = mBookmarkId < 0 ? null :
-                    adapter.getBookmarkTagIds(mBookmarkId);
-         } else {
-            mBookmarkTags = null;
-         }
-         return null;
-      }
-      
-      @Override
-      protected void onPostExecute(Void result) {
-          for (Tag tag : mTags){
-             if (mBookmarkTags != null && mBookmarkTags.contains(tag.mId)){
-                tag.setChecked(true);
-             }
+      final Tag tag = (Tag) getItem(position);
+      holder = (ViewHolder) convertView.getTag();
+      if (tag.id == -1) {
+        holder.addImage.setVisibility(View.VISIBLE);
+        holder.checkBox.setVisibility(View.GONE);
+        holder.tagName.setText(mNewTagString);
+      } else {
+        holder.addImage.setVisibility(View.GONE);
+        holder.checkBox.setVisibility(View.VISIBLE);
+        holder.checkBox.setChecked(mCheckedTags.contains(tag.id));
+        holder.tagName.setText(tag.name);
+        holder.checkBox.setOnClickListener(new OnClickListener() {
+          public void onClick(View v) {
+            mTagBookmarkPresenter.toggleTag(tag.id);
           }
-          mAdapter.notifyDataSetChanged();
+        });
       }
-   }
+      return convertView;
+    }
+  }
 
-   class ViewHolder {
-      CheckBox checkBox;
-      TextView tagName;
-      ImageView addImage;
-   }
-   
-   class AddTagTask extends AsyncTask<String, Void, Tag> {
-       @Override
-       protected Tag doInBackground(String... params) {
-          BookmarksDBAdapter adapter = null;
-          Activity activity = getActivity();
-          if (activity != null && activity instanceof BookmarkHandler){
-             adapter = ((BookmarkHandler) activity).getBookmarksAdapter();
-          }
+  static class ViewHolder {
+    CheckBox checkBox;
+    TextView tagName;
+    ImageView addImage;
+  }
 
-          if (adapter == null){ return null; }
-          long id = adapter.addTag(params[0]);
-          Tag t = new Tag(id, params[0]);
-          return t;
-       }
-       @Override
-       protected void onPostExecute(Tag result) {
-          if (result != null && mTags != null && mAdapter != null) {
-             result.setChecked(true);
-             mTags.add(mTags.size() - 1, result);
-             mAdapter.notifyDataSetChanged();
-          }
-       };
-   }
-   
-   class UpdateBookmarkTagsTask extends AsyncTask<Void, Void, Void> {
-      private OnBookmarkTagsUpdateListener mListener;
-      public UpdateBookmarkTagsTask(OnBookmarkTagsUpdateListener listener) {
-         mListener = listener;
-      }
-
-      @Override
-      protected Void doInBackground(Void... params) {
-         BookmarksDBAdapter adapter = null;
-         Activity activity = getActivity();
-         if (activity != null && activity instanceof BookmarkHandler) {
-            adapter = ((BookmarkHandler) activity).getBookmarksAdapter();
-         }
-
-         if (adapter == null) {
-            return null;
-         }
-
-         if (mBookmarkIds == null) {
-            if (mBookmarkId < 0) {
-               mBookmarkId = adapter.addBookmarkIfNotExists(mSura,
-                       mAyah, mPage);
-            }
-            adapter.tagBookmark(mBookmarkId, mTags);
-         } else {
-            adapter.tagBookmarks(mBookmarkIds, mTags);
-         }
-         return null;
-      }
-
-      @Override
-      protected void onPostExecute(Void result) {
-         mListener.onBookmarkTagsUpdated();
-      }
-   }
-
-   public interface OnBookmarkTagsUpdateListener {
-      public void onBookmarkTagsUpdated();
-      public void onAddTagSelected();
-   }
-   
+  public interface OnBookmarkTagsUpdateListener {
+    void onAddTagSelected();
+  }
 }

@@ -1,35 +1,43 @@
 package com.quran.labs.androidquran.ui.helpers;
 
+import com.quran.labs.androidquran.R;
+import com.quran.labs.androidquran.common.Response;
+import com.quran.labs.androidquran.data.QuranInfo;
+import com.quran.labs.androidquran.util.QuranFileUtils;
+import com.quran.labs.androidquran.util.QuranUtils;
+
+import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.LinearGradient;
+import android.graphics.Point;
 import android.graphics.Shader;
 import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.os.Build;
+import android.view.Display;
 import android.widget.Toast;
-import com.quran.labs.androidquran.R;
-import com.quran.labs.androidquran.data.QuranInfo;
-import com.quran.labs.androidquran.util.ArabicStyle;
-import com.quran.labs.androidquran.util.QuranFileUtils;
-import com.quran.labs.androidquran.util.QuranSettings;
-import com.quran.labs.androidquran.util.QuranUtils;
+
+import timber.log.Timber;
 
 public class QuranDisplayHelper {
-   private static final String TAG = "QuranDisplayHelper";
-   
-   public static Bitmap getQuranPage(Context context,
+
+   public static Response getQuranPage(Context context,
                                      String widthParam, int page){
-      Bitmap bitmap;
+      Response response;
 
       String filename = QuranFileUtils.getPageFileName(page);
-      bitmap = QuranFileUtils.getImageFromSD(context, widthParam, filename);
-      if (bitmap == null) {
-         android.util.Log.d(TAG, "failed to get " + page +
-                 " with name " + filename + " from sd...");
-         bitmap = QuranFileUtils.getImageFromWeb(context, filename);
+      response = QuranFileUtils.getImageFromSD(context, widthParam, filename);
+      if (!response.isSuccessful()) {
+        // let's only try if an sdcard is found... otherwise, let's tell
+        // the user to mount their sdcard and try again.
+        if (response.getErrorCode() != Response.ERROR_SD_CARD_NOT_FOUND) {
+          Timber.d("failed to get " + page +
+              " with name " + filename + " from sd...");
+          response = QuranFileUtils.getImageFromWeb(context, filename);
+        }
       }
-      return bitmap;
+      return response;
    }
    
    public static long displayMarkerPopup(Context context, int page,
@@ -63,9 +71,6 @@ public class QuranDisplayHelper {
       }
 
       String result = sb.toString();
-      if (QuranSettings.isReshapeArabic(context)){
-         result = ArabicStyle.reshape(context, result);
-      }
       Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
       return System.currentTimeMillis();
    }
@@ -91,4 +96,11 @@ public class QuranDisplayHelper {
          }
       };
    }
+
+  @TargetApi(Build.VERSION_CODES.KITKAT)
+  public static int getWidthKitKat(Display display){
+    Point point = new Point();
+    display.getRealSize(point);
+    return point.x;
+  }
 }

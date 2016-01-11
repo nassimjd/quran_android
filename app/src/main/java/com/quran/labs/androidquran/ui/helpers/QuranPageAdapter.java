@@ -1,22 +1,24 @@
 package com.quran.labs.androidquran.ui.helpers;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.view.ViewGroup;
+import com.quran.labs.androidquran.data.Constants;
+import com.quran.labs.androidquran.data.QuranInfo;
 import com.quran.labs.androidquran.ui.fragment.QuranPageFragment;
 import com.quran.labs.androidquran.ui.fragment.TabletFragment;
 import com.quran.labs.androidquran.ui.fragment.TranslationFragment;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.view.ViewGroup;
+
+import timber.log.Timber;
+
+import static com.quran.labs.androidquran.data.Constants.PAGES_LAST;
+import static com.quran.labs.androidquran.data.Constants.PAGES_LAST_DUAL;
+
 public class QuranPageAdapter extends FragmentStatePagerAdapter {
-   private static String TAG = "QuranPageAdapter";
 
    private boolean mIsShowingTranslation = false;
    private boolean mIsDualPages = false;
-
-	public QuranPageAdapter(FragmentManager fm, boolean dualPages){
-		super(fm);
-      mIsDualPages = dualPages;
-	}
 
    public QuranPageAdapter(FragmentManager fm, boolean dualPages,
                            boolean isShowingTranslation){
@@ -59,22 +61,23 @@ public class QuranPageAdapter extends FragmentStatePagerAdapter {
    }
 
 	@Override
-	public int getCount(){ return mIsDualPages ? 302 : 604; }
+	public int getCount() {
+    return mIsDualPages ? PAGES_LAST_DUAL : PAGES_LAST;
+  }
 
 	@Override
 	public Fragment getItem(int position){
-      int count = getCount();
-	   android.util.Log.d(TAG, "getting page: " + (count-position));
+    int page = QuranInfo.getPageFromPos(position, mIsDualPages);
+	   Timber.d("getting page: " + page);
       if (mIsDualPages){
-         return TabletFragment.newInstance((count-position)*2,
+         return TabletFragment.newInstance(page,
                 mIsShowingTranslation? TabletFragment.Mode.TRANSLATION :
                         TabletFragment.Mode.ARABIC);
+      } else if (mIsShowingTranslation){
+         return TranslationFragment.newInstance(page);
+      } else {
+        return QuranPageFragment.newInstance(page);
       }
-
-      if (mIsShowingTranslation){
-         return TranslationFragment.newInstance(count-position);
-      }
-	   else { return QuranPageFragment.newInstance(count-position); }
 	}
 	
 	@Override
@@ -88,4 +91,15 @@ public class QuranPageAdapter extends FragmentStatePagerAdapter {
       }
 	   super.destroyItem(container, position, object);
 	}
+
+  public AyahTracker getFragmentIfExistsForPage(int page){
+    if (page < Constants.PAGES_FIRST || PAGES_LAST < page) {
+      return null;
+    }
+    int position = QuranInfo.getPosFromPage(page, mIsDualPages);
+    Fragment fragment = getFragmentIfExists(position);
+    return fragment != null && fragment instanceof AyahTracker ?
+        (AyahTracker) fragment : null;
+  }
+
 }

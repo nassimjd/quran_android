@@ -1,22 +1,27 @@
 package com.quran.labs.androidquran.database;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-
 import com.crashlytics.android.Crashlytics;
 import com.quran.labs.androidquran.R;
 import com.quran.labs.androidquran.util.QuranFileUtils;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.DefaultDatabaseErrorHandler;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
+import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
+
 import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import timber.log.Timber;
 
 
 public class DatabaseHandler {
-
-  private SQLiteDatabase mDatabase = null;
-  private String mDatabasePath = null;
-
   public static String COL_SURA = "sura";
   public static String COL_AYAH = "ayah";
   public static String COL_TEXT = "text";
@@ -27,13 +32,26 @@ public class DatabaseHandler {
   public static String COL_PROPERTY = "property";
   public static String COL_VALUE = "value";
 
-  private int mSchemaVersion = 1;
-  private String mMatchString;
-
   private static final String MATCH_END = "</font>";
   private static final String ELLIPSES = "<b>...</b>";
 
-  public DatabaseHandler(Context context, String databaseName)
+  private static Map<String, DatabaseHandler> sDatabaseMap = new HashMap<>();
+
+  private int mSchemaVersion = 1;
+  private String mMatchString;
+  private SQLiteDatabase mDatabase = null;
+
+  public static synchronized DatabaseHandler getDatabaseHandler(
+      Context context, String databaseName) {
+    DatabaseHandler handler = sDatabaseMap.get(databaseName);
+    if (handler == null) {
+      handler = new DatabaseHandler(context.getApplicationContext(), databaseName);
+      sDatabaseMap.put(databaseName, handler);
+    }
+    return handler;
+  }
+
+  private DatabaseHandler(Context context, String databaseName)
       throws SQLException {
     String base = QuranFileUtils.getQuranDatabaseDirectory(context);
     if (base == null) return;
@@ -41,7 +59,9 @@ public class DatabaseHandler {
     Crashlytics.log("opening database file: " + path);
     try {
       mDatabase = SQLiteDatabase.openDatabase(path, null,
-        SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        SQLiteDatabase.NO_LOCALIZED_COLLATORS, new DefaultDatabaseErrorHandler());
+    } catch (SQLiteDatabaseCorruptException sce) {
+      Crashlytics.log("corrupt database: " + databaseName);
     } catch (SQLException se){
       Crashlytics.log("database file " + path +
           (new File(path).exists()? " exists" : " doesn't exist"));
@@ -49,74 +69,46 @@ public class DatabaseHandler {
     }
 
     mSchemaVersion = getSchemaVersion();
-    mDatabasePath = path;
     mMatchString = "<font color=\"" +
         context.getResources().getColor(R.color.translation_highlight) +
         "\">";
   }
 
   public boolean validDatabase() {
-    return (mDatabase != null) && mDatabase.isOpen();
-  }
-
-  public boolean reopenDatabase() {
-    try {
-      mDatabase = SQLiteDatabase.openDatabase(mDatabasePath,
-          null, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
-      return (mDatabase != null);
-    } catch (Exception e) {
-      return false;
-    }
+    return mDatabase != null && mDatabase.isOpen();
   }
 
   public Cursor getVerses(int sura, int minAyah, int maxAyah) {
     return getVerses(sura, minAyah, maxAyah, VERSE_TABLE);
   }
 
-  public int getSchemaVersion() {
-    int version = 1;
+  private int getProperty(@NonNull String column) {
+    int value = 1;
     if (!validDatabase()) {
-      return version;
+      return value;
     }
 
-    Cursor result = null;
+    Cursor cursor = null;
     try {
-      result = mDatabase.query(PROPERTIES_TABLE, new String[]{COL_VALUE},
-          COL_PROPERTY + "= ?", new String[]{"schema_version"},
-          null, null, null);
-      if ((result != null) && (result.moveToFirst()))
-        version = result.getInt(0);
-      if (result != null)
-        result.close();
-      return version;
+      cursor = mDatabase.query(PROPERTIES_TABLE, new String[]{ COL_VALUE },
+          COL_PROPERTY + "= ?", new String[]{ column }, null, null, null);
+      if (cursor != null && cursor.moveToFirst()) {
+        value = cursor.getInt(0);
+      }
+      return value;
     } catch (SQLException se) {
-      if (result != null)
-        result.close();
-      return version;
+      return value;
+    } finally {
+      DatabaseUtils.closeCursor(cursor);
     }
   }
 
-  public int getTextVersion() {
-    int version = 1;
-    if (!validDatabase()) {
-      return version;
-    }
+  public int getSchemaVersion() {
+    return getProperty("schema_version");
+  }
 
-    Cursor result = null;
-    try {
-      result = mDatabase.query(PROPERTIES_TABLE, new String[]{COL_VALUE},
-          COL_PROPERTY + "= ?", new String[]{"text_version"},
-          null, null, null);
-      if ((result != null) && (result.moveToFirst()))
-        version = result.getInt(0);
-      if (result != null)
-        result.close();
-      return version;
-    } catch (SQLException se) {
-      if (result != null)
-        result.close();
-      return version;
-    }
+  public int getTextVersion() {
+    return getProperty("text_version");
   }
 
   public Cursor getVerses(int sura, int minAyah, int maxAyah, String table) {
@@ -126,9 +118,7 @@ public class DatabaseHandler {
   public Cursor getVerses(int minSura, int minAyah, int maxSura,
                           int maxAyah, String table) {
     if (!validDatabase()) {
-      if (!reopenDatabase()) {
         return null;
-      }
     }
 
     StringBuilder whereQuery = new StringBuilder();
@@ -166,7 +156,7 @@ public class DatabaseHandler {
     whereQuery.append(")");
 
     return mDatabase.query(table,
-        new String[]{COL_SURA, COL_AYAH, COL_TEXT},
+        new String[] { "rowid as _id", COL_SURA, COL_AYAH, COL_TEXT },
         whereQuery.toString(), null, null, null,
         COL_SURA + "," + COL_AYAH);
   }
@@ -175,15 +165,28 @@ public class DatabaseHandler {
     return getVerses(sura, ayah, ayah);
   }
 
+  public Cursor getVersesByIds(List<Integer> ids) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0, idsSize = ids.size(); i < idsSize; i++) {
+      if (i > 0) {
+        builder.append(",");
+      }
+      builder.append(ids.get(i));
+    }
+
+    Timber.d("querying verses by ids for tags...");
+    final String sql = "SELECT rowid as _id, " + COL_SURA + ", " + COL_AYAH + ", " + COL_TEXT +
+        " FROM " + ARABIC_TEXT_TABLE + " WHERE rowid in(" + builder.toString() + ")";
+    return mDatabase.rawQuery(sql, null);
+  }
+
   public Cursor search(String query, boolean withSnippets) {
     return search(query, VERSE_TABLE, withSnippets);
   }
 
   public Cursor search(String q, String table, boolean withSnippets) {
     if (!validDatabase()) {
-      if (!reopenDatabase()) {
         return null;
-      }
     }
 
     String query = q;
@@ -198,35 +201,39 @@ public class DatabaseHandler {
       query = "%" + query + "%";
     }
 
+    int pos = 0;
+    int found = 0;
+    boolean done = false;
+    while (!done) {
+      int quote = query.indexOf("\"", pos);
+      if (quote > -1) {
+        found++;
+        pos = quote + 1;
+      } else {
+        done = true;
+      }
+    }
+
+    if (found % 2 != 0) {
+      query = query.replaceAll("\"", "");
+    }
+
     if (useFullTextIndex && withSnippets) {
       whatTextToSelect = "snippet(" + table + ", '" +
           mMatchString + "', '" + MATCH_END +
           "', '" + ELLIPSES + "', -1, 64)";
     }
 
-    String qtext = "select " + COL_SURA + ", " + COL_AYAH +
+    String qtext = "select rowid as " + BaseColumns._ID + ", " + COL_SURA + ", " + COL_AYAH +
         ", " + whatTextToSelect + " from " + table + " where " + COL_TEXT +
         operator + " ? " + " limit 150";
     Crashlytics.log("search query: " + qtext + ", query: " + query);
 
     try {
-      Cursor c = mDatabase.rawQuery(qtext, new String[]{query});
-      return c;
+      return mDatabase.rawQuery(qtext, new String[]{ query });
     } catch (Exception e){
-      if (withSnippets && useFullTextIndex){
-        Crashlytics.log("error querying, trying again without snippets...");
-        return search(q, table, false);
-      } else {
-        Crashlytics.logException(e);
-        return null;
-      }
-    }
-  }
-
-  public void closeDatabase() {
-    if (mDatabase != null) {
-      mDatabase.close();
-      mDatabase = null;
+      Crashlytics.logException(e);
+      return null;
     }
   }
 }
